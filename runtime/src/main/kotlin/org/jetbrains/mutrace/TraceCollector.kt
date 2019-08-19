@@ -46,7 +46,8 @@ class DurationBuffers(val thread: Thread) {
 const val blockSize = 1024 * 16 * 32
 const val stringsSize = 1024 * 16 * 32
 
-const val MAX_BUFFER_SIZE = 1024 * 1024 * 1024 * 2L // 1GB of buffers
+const val DEFAULT_MAX_BUFFER_SIZE = 1024 * 1024 * 1024 * 2L // 2GB of buffers
+val MAX_BUFFER_SIZE = System.getProperty("muTrace.maxBufferSize")?.toLongOrNull() ?: DEFAULT_MAX_BUFFER_SIZE
 
 sealed class StorageBlock(val threadId: Long) {
     abstract fun estimateSize(): Int
