@@ -1,6 +1,5 @@
 package org.jetbrains.mutrace
 
-import org.jetbrains.mutrace.TraceCollector.checkStringsOverflow
 import org.jetbrains.mutrace.format.MeasureKind
 import java.lang.System.nanoTime
 import java.nio.ByteBuffer
@@ -78,30 +77,28 @@ object TraceCollector {
             allDurationBuffers.add(it)
         }
     }
-    val storage = mutableListOf<StorageBlock>()
-    private var estimateStorageSize = 0L
+    val storage = ConcurrentLinkedQueue<StorageBlock>()
+    @Volatile private var estimateStorageSize = 0L
 
-    internal fun storageForExport() = synchronized(storage) {
+    internal fun storageForExport() =
         CollectorStorage(storage.toList())
-    }
+
 
     fun clear() {
-        synchronized(storage) {
-            storage.clear()
-            estimateStorageSize = 0
-        }
+        storage.clear()
+        estimateStorageSize = 0
     }
 
     private fun DurationBuffers.retire() = synchronized(this) {
         val old = buffer
         buffer = newBlock()
-        retire(StorageBlock.BufferBlock(old))
+        retire(StorageBlock.BufferBlock(old, this.thread.id))
     }
 
     private fun DurationBuffers.retireStrings() = synchronized(this) {
         val old = strings
         strings = newStrings()
-        retire(StorageBlock.StringsBlock(old))
+        retire(StorageBlock.StringsBlock(old, this.thread.id))
     }
 
     private fun DurationBuffers.retireAll() {
@@ -118,14 +115,12 @@ object TraceCollector {
     }
 
     private fun retire(block: StorageBlock) {
-        synchronized(storage) {
-            storage.add(block)
-            estimateStorageSize += block.estimateSize()
+        storage.add(block)
+        estimateStorageSize += block.estimateSize()
 
-            while (estimateStorageSize > MAX_BUFFER_SIZE) {
-                System.err.println("μTrace buffer full! Consider drain data")
-                estimateStorageSize -= storage.removeAt(0).estimateSize()
-            }
+        while (estimateStorageSize > MAX_BUFFER_SIZE) {
+            System.err.println("μTrace buffer full! Consider drain data")
+            estimateStorageSize -= storage.poll().estimateSize()
         }
     }
 
