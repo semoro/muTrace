@@ -28,24 +28,11 @@ class RandomAccessFileDeserializerInput(val file: RandomAccessFile): Deserialize
 
 }
 
-@ImplicitReflectionSerializer
-@UseExperimental(UnstableDefault::class)
-fun main(args: Array<String>) {
+fun convertModel(readForm: File): List<TraceEvent> {
 
-
-    val deserializer = Deserializer(RandomAccessFileDeserializerInput(RandomAccessFile(File("/Users/jetbrains/Workspace/utrace/agent-test/output.mutrace.bin"), "r")))
+    val deserializer = Deserializer(RandomAccessFileDeserializerInput(RandomAccessFile(readForm, "r")))
     val header = deserializer.readHeader()
     println(header)
-
-
-    val json = Json(JsonConfiguration.Stable.copy(
-        encodeDefaults = false,
-        prettyPrint = false,
-        useArrayPolymorphism = true
-    )
-    )
-
-
 
     val traceEvents = mutableListOf<TraceEvent>()
 
@@ -97,11 +84,32 @@ fun main(args: Array<String>) {
 
     })
 
+    return traceEvents
+}
 
-    File("output.trace").writeText(json.stringify(
+
+@UseExperimental(ImplicitReflectionSerializer::class)
+fun jsonify(input: File, output: File) {
+
+    val json = Json(
+        JsonConfiguration.Stable.copy(
+            encodeDefaults = false,
+            prettyPrint = false,
+            useArrayPolymorphism = true
+        )
+    )
+
+    val traceEvents = convertModel(input)
+    output.writeText(json.stringify(
         TraceRoot(
             traceEvents,
             displayTimeUnit = TimeUnit.NANOSECONDS
         )
     ))
+}
+
+@ImplicitReflectionSerializer
+fun main(args: Array<String>) {
+
+    jsonify(File(args[0]), (args.getOrNull(1) ?: "output.trace").let { File(it) })
 }
