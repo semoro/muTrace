@@ -30,8 +30,12 @@ private inline fun <T> Collection<T>.sumByLong(value: (T) -> Long) : Long =
 
 class Serializer(private val output: SerializerOutput) {
 
-    inline fun serialize(version: FormatVersion, pid: Long, body: SerializerTopLevel.() -> Unit){
+    inline fun withHeader(version: FormatVersion, pid: Long, body: SerializerTopLevel.() -> Unit){
         store(Header(version, pid))
+        appending(body)
+    }
+
+    inline fun appending(body: SerializerTopLevel.() -> Unit) {
         SerializerTopLevel(this).body()
     }
 
