@@ -37,7 +37,7 @@ object TraceDataExporter {
     }
 
     fun appendTraceData(outputFile: File) {
-        if (!outputFile.exists()) TraceDataExporter.exportTraceData(outputFile)
+        if (!outputFile.exists() || outputFile.length() == 0L) return exportTraceData(outputFile)
         val data = gatherData()
         RandomAccessFile(outputFile, "rw").use { outputRf ->
             outputRf.seek(outputRf.length()) // move to end
