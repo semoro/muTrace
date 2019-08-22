@@ -103,7 +103,7 @@ class Deserializer(val input: DeserializerInput) {
             val readerPosition = stringsReaderPositions[tid]
             if (readerPosition == null || readerPosition.remaining() <= 0) {
                 val pos = (readerPosition?.stringsNumber ?: -1) + 1
-                val nextPos = stringsPositionIndex.drop(pos).indexOfFirst { (_, header) -> header.tid == tid }
+                val nextPos = pos + stringsPositionIndex.drop(pos).indexOfFirst { (_, header) -> header.tid == tid }
                 val (offset, header) = stringsPositionIndex[nextPos]
                 stringsReaderPositions[tid] = StringsReaderPosition(header, nextPos, offset)
             }
