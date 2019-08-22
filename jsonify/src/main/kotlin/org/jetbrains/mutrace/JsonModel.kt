@@ -97,3 +97,20 @@ data class TraceRoot(
     val systemTraceEvents: String? = null,
     val controllerTraceDataKey: String? = null
 )
+
+
+abstract class StreamedEvents
+
+@Serializable
+data class StreamedTraceRoot(
+    @ContextualSerialization
+    val traceEvents: StreamedEvents,
+
+    @Serializable(with = TimeUnitSerializer::class)
+    val displayTimeUnit: TimeUnit,
+    val samples: List<TraceEvent>? = null,
+    val stackFrames: Map<Int, StackFrame>? = null,
+    val powerTraceAsString: String? = null,
+    val systemTraceEvents: String? = null,
+    val controllerTraceDataKey: String? = null
+)
