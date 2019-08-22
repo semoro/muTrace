@@ -6,22 +6,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.reflect.full.isSubclassOf
 
 
-/*
-If provided displayTimeUnit is a string that specifies in which unit timestamps should be displayed. This supports values of “ms” or “ns”. By default this is value is “ms”.
-
-If provided systemTraceEvents is a string of Linux ftrace data or Windows ETW trace data. This data must start with # tracer: and adhere to the Linux ftrace format or adhere to Windows ETW format.
-
-If provided, powerTraceAsString is a string of BattOr power data.
-
-If provided, the stackFrames field is a dictionary of stack frames, their ids, and their parents that allows compact representation of stack traces throughout the rest of the trace file. It is optional but sometimes very useful in shrinking file sizes.
-
-The samples array is used to store sampling profiler data from a OS level profiler. It stores samples that are different from trace event samples, and is meant to augment the traceEvent data with lower level information. It is OK to have a trace event file with just sample data, but in that case  traceEvents must still be provided and set to []. For more information on sample data, refer to the global samples section.
-
-If provided, controllerTraceDataKey is a string that specifies which trace data comes from tracing controller. Its value should be the key for that specific trace data. For example, {..., "controllerTraceDataKey": "traceEvents"} means the data for traceEvents comes from the tracing controller. This is mainly for the purpose of clock synchronization.
-
-Any other properties seen in the object, in this case otherData a
-
- */
 
 @Serializable
 data class StackFrame(val name: String, val category: String, val parent: Int? = null)
