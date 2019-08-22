@@ -61,9 +61,7 @@ class InternerTransformer(api: Int, classVisitor: ClassVisitor?) : ClassVisitor(
             var line = 0
 
             fun findLdc(value: ConstValue): LdcInsnNode {
-                val valueFlow = generateSequence(value) {
-                    (it as? ConstValue)?.prev
-                }
+                val valueFlow = generateSequence(value) { it.prev }
                 return valueFlow.map { it.insn }
                     .filterIsInstance<LdcInsnNode>()
                     .singleOrNull() ?: reportNonConstArgumentError()
